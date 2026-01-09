@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Send a Fish</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(#0b3d91, #021b33);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+
+    .card {
+      background: rgba(0,0,0,0.4);
+      padding: 24px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 320px;
+      text-align: center;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      margin-bottom: 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 12px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      background: #00c8ff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      background: gray;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h2>🐟 Send a Fish</h2>
+    <p>Enter your name and choose a fish type</p>
+
+    <input id="nameInput" placeholder="Your name" maxlength="16" />
+    <select id="fishType">
+      <option value="A">Fish A (Cylinder)</option>
+      <option value="B">Fish B (Cube)</option>
+      <option value="C">Fish C (Sphere)</option>
+    </select>
+    <button id="sendBtn">Send</button>
+
+    <div class="status" id="status"></div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <script>
+    // 🔥 PASTE YOUR CONFIG HERE
+    const firebaseConfig = {
+      apiKey: "AIzaSyDymUK8p77PjOPd79ZXuDJj5gpWvs9-pN0",
+      authDomain: "test-4fe50.firebaseapp.com",
+      databaseURL: "https://test-4fe50-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "test-4fe50",
+      storageBucket: "test-4fe50.firebasestorage.app",
+      messagingSenderId: "1098899013890",
+      appId: "1:1098899013890:web:ca301e416d4b061cde821b"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+
+    const db = firebase.database();
+    const fishQueue = db.ref("fishQueue");
+
+    const nameInput = document.getElementById("nameInput");
+    const fishTypeSelect = document.getElementById("fishType");
+    const sendBtn = document.getElementById("sendBtn");
+    const status = document.getElementById("status");
+
+    sendBtn.onclick = () => {
+      const name = nameInput.value.trim();
+      const type = fishTypeSelect.value;
+
+      if (name.length < 1) {
+        status.textContent = "Please enter a name";
+        return;
+      }
+
+      sendBtn.disabled = true;
+      status.textContent = "Sending your fish...";
+
+      fishQueue.push({
+        name: name,
+        type: type,      // Send type along with name
+        time: Date.now()
+      }).then(() => {
+        status.textContent = `🐠 Your fish (${type}) is swimming!`;
+        nameInput.value = "";
+        fishTypeSelect.value = "A"; // reset to default
+        setTimeout(() => sendBtn.disabled = false, 2000);
+      }).catch(err => {
+        status.textContent = "Error, please try again";
+        sendBtn.disabled = false;
+        console.error(err);
+      });
+    };
+  </script>
+</body>
+</html>
